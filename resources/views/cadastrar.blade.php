@@ -33,7 +33,7 @@
         <div class="row">
             <div class="col-6">
                 <div class="form-group">
-                    Nome: <input type="text" name="nome" class="form-control" />
+                    Nome: <input type="text" name="nome" class="form-control" require/>
                 </div>
             </div>
             <div class="col-6">
@@ -43,12 +43,12 @@
             </div>
             <div class="col-6">
                 <div class="form-group">
-                    CPF: <input type="text" name="login" id="cpf" class="form-control" />
+                    CPF: <input type="text" name="login" id="cpf" class="form-control" require/>
                 </div>
             </div>
             <div class="col-6">
                 <div class="form-group">
-                    Senha: <input type="password" name="senha" class="form-control" />
+                    Senha: <input type="password" name="senha" class="form-control" require/>
                 </div>
             </div>
             <div class="col-8">
@@ -73,7 +73,7 @@
             </div>
             <div class="col-4">
                 <div class="form-group">
-                    Cep: <input type="text" name="cep" id="cep" class="form-control" />
+                    Cep: <input type="text" name="cep" id="cep" class="form-control"/>
                 </div>
             </div>
             <div class="col-4">

@@ -32,15 +32,17 @@
                         <a href="{{ route('categoria')}}" class="nav-link">Categorias</a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('logar')}}" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('cadastrar')}}" class="nav-link">Cadastrar</a>
                     </li>
                 </ul>
             </div>
 
             <a href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fa fa-shopping-cart fa-2x"></i></a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
@@ -48,6 +50,24 @@
 
     <div class="container">
         <div class="row">
+        @if(auth()->check())
+    <!-- Se o usuário estiver logado, exiba a mensagem de boas-vindas ou qualquer outro conteúdo desejado -->
+    <div class="col-12">
+        <div class="alert alert-success">Bem-vindo, {{ auth()->user()->nome }}!</div>
+    </div>
+    @endif
+
+            @if($message = Session::get("err"))
+            <div class="col-12">
+                <div class="alert alert-danger">{{$message}}</div>
+            </div>
+            @endif
+
+            @if($message = Session::get("ok"))
+            <div class="col-12">
+                <div class="alert alert-success">{{$message}}</div>
+            </div>
+            @endif
             <!-- área que os outros arquivos irão adicionar conteúdo -->
             @yield("conteudo")
         </div>

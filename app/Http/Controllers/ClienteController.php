@@ -6,6 +6,7 @@ use App\Models\Endereco;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
+use App\Services\ClienteService;
 
 
 class ClienteController extends Controller
@@ -30,18 +31,16 @@ class ClienteController extends Controller
 
         $endereco = new Endereco($value);
 
+        $clienteService = new ClienteService();
+        $result = $clienteService->salvarUsuario($usuario, $endereco);
        
-        try {
-            \DB::beginTransaction();//Iniciar Transação
-            $usuario->save(); // Salvar o usuário
-            $endereco->usuario_id = $usuario->id; // Relaciona a tabela usuario com endereço pelo id
-            $endereco->save(); // Salvar o endereco
-            \DB::commit();//Confirmar Transação
-        } catch (\Exception $e) {
-            // Tratar exceções, se necessário
-            \DB::rollback(); //Cancela a transação se ocorre um erro
-        }
+        $message = $result["message"];
+        $status = $result["status"];
+        
+        $request->session()->flash($status, $message);
+   
 
         return redirect()->route("cadastrar");
     }
+
 }
