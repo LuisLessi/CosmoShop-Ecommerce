@@ -48,11 +48,34 @@ class ProdutoController extends Controller
            session([ 'cart' => $carrinho ]);
         }
 
-        return redirect()->route("home");
+        return redirect()->route("ver_carrinho");
     }
 
     public function verCarrinho(Request $request){
         $carrinho = session('cart', []);
-        dd($carrinho);
+        $data = ['cart' => $carrinho];
+        return view("carrinho", $data);
     }
+
+    public function removerItemCarrinho($idProduto, Request $request)
+{
+    $carrinho = session('cart', []);
+
+    // Encontrar o índice do item no carrinho
+    $indice = -1;
+    foreach ($carrinho as $index => $produto) {
+        if ($produto->id == $idProduto) {
+            $indice = $index;
+            break;
+        }
+    }
+
+    // Remover o item do carrinho se encontrado
+    if ($indice !== -1) {
+        unset($carrinho[$indice]);
+        session(['cart' => $carrinho]);
+    }
+
+    return redirect()->route('ver_carrinho');
+}
 }
