@@ -51,11 +51,13 @@
     <div class="container">
         <div class="row">
         @if(auth()->check())
-    <!-- Se o usuário estiver logado, exiba a mensagem de boas-vindas ou qualquer outro conteúdo desejado -->
-    <div class="col-12">
-        <div class="alert alert-success">Bem-vindo, {{ auth()->user()->nome }}!</div>
-    </div>
-    @endif
+            <!-- Se o usuário estiver logado, exiba a mensagem de boas-vindas com o primeiro nome -->
+            <div class="col-12">
+                <?php $nomeCompleto = auth()->user()->nome; ?>
+                <?php $primeiroNome = explode(" ", $nomeCompleto)[0]; ?>
+                <h4>Bem-vindo, {{ $primeiroNome }}!</h4>
+            </div>
+        @endif
 
             @if($message = Session::get("err"))
             <div class="col-12">
