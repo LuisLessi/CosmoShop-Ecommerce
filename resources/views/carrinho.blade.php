@@ -17,7 +17,7 @@
         @php $total =0; @endphp
         @foreach($cart as $p)
         <tr>
-        <td><img src="{{ asset($p['foto']) }}" alt="" class="img-thumbnail rounded-circle" style="width: 100px;"></td>
+            <td><img src="{{ asset($p['foto']) }}" alt="" class="img-thumbnail rounded-circle" style="width: 100px;"></td>
             <td style="vertical-align: middle;">{{ $p['nome'] }}</td>
             <td style="vertical-align: middle;">{{ $p['valor'] }}</td>
             <td style="vertical-align: middle;">{{ $p['descricao'] }}</td>
@@ -27,20 +27,21 @@
                 </a>
             </td>
         </tr>
-        
+
         @php $total += $p->valor; @endphp
         @endforeach
     </tbody>
     <tfooter>
         <tr>
             <td colspan="5">
-                Total do carrinho: R$
+                Total do carrinho: R$ {{$total}}
             </td>
         </tr>
     </tfooter>
 </table>
 
 <form action="{{ route('finalizar_carrinho')}}" style="text-align: right;" method="post">
+    @csrf
     <input type="submit" value="Finalizar compra" class="mb-5 btn btn-lg btn-success">
 </form>
 

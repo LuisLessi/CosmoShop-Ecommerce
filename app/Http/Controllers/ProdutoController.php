@@ -39,49 +39,60 @@ class ProdutoController extends Controller
         return view('categoria', $data);
     }
 
-    public function adicionarCarrinho($idProduto =0, Request $request) {
+    public function adicionarCarrinho($idProduto = 0, Request $request)
+    {
         //Buscar o produto pelo o ID
         $prod = Produto::find($idProduto);
 
-        if($prod){
+        if ($prod) {
             //Encontrou o produto
-            
-           $carrinho = session('cart', []);
-           
-           array_push($carrinho, $prod);
-           session([ 'cart' => $carrinho ]);
+
+            $carrinho = session('cart', []);
+
+            array_push($carrinho, $prod);
+            session(['cart' => $carrinho]);
+            $message = "Produto adicionado ao carrinho";
+            $status = "ok";
+
+            $request->session()->flash($status, $message);
+        } else {
+            $message = "Erro ao adicionar produto no carrinho";
+            $status = "erro";
+
+            $request->session()->flash($status, $message);
         }
 
         return redirect()->back();
     }
 
-    public function verCarrinho(Request $request){
+    public function verCarrinho(Request $request)
+    {
         $carrinho = session('cart', []);
         $data = ['cart' => $carrinho];
         return view("carrinho", $data);
     }
 
     public function removerItemCarrinho($idProduto, Request $request)
-{
-    $carrinho = session('cart', []);
+    {
+        $carrinho = session('cart', []);
 
-    // Encontrar o índice do item no carrinho
-    $indice = -1;
-    foreach ($carrinho as $index => $produto) {
-        if ($produto->id == $idProduto) {
-            $indice = $index;
-            break;
+        // Encontrar o índice do item no carrinho
+        $indice = -1;
+        foreach ($carrinho as $index => $produto) {
+            if ($produto->id == $idProduto) {
+                $indice = $index;
+                break;
+            }
         }
-    }
 
-    // Remover o item do carrinho se encontrado
-    if ($indice !== -1) {
-        unset($carrinho[$indice]);
-        session(['cart' => $carrinho]);
-    }
+        // Remover o item do carrinho se encontrado
+        if ($indice !== -1) {
+            unset($carrinho[$indice]);
+            session(['cart' => $carrinho]);
+        }
 
-    return redirect()->route('ver_carrinho');
-}
+        return redirect()->route('ver_carrinho');
+    }
 
     public function finalizarCarrinho(Request $request)
     {
