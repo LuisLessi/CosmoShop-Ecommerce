@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Pedido;
 use App\Models\Produto;
-
+use App\Models\Usuario;
+use App\Services\VendaService;
 use Illuminate\Http\Request;
+
+use Auth;
 
 class ProdutoController extends Controller
 {
@@ -14,7 +18,7 @@ class ProdutoController extends Controller
         $data = [
             'produtos' => Produto::all()
         ];
-        
+
         return view("home", $data);
     }
 
@@ -48,7 +52,7 @@ class ProdutoController extends Controller
            session([ 'cart' => $carrinho ]);
         }
 
-        return redirect()->route("ver_carrinho");
+        return redirect()->back();
     }
 
     public function verCarrinho(Request $request){
@@ -78,4 +82,34 @@ class ProdutoController extends Controller
 
     return redirect()->route('ver_carrinho');
 }
+
+    public function finalizarCarrinho(Request $request)
+    {
+        $carrinho = session('cart', []);
+        $vendaService = new VendaService();
+        $result = $vendaService->finalizarVenda($carrinho, auth::user());
+
+        if ($result["status"] == "ok") {
+            $request->session()->forget("cart");
+        }
+
+        $request->session()->flash($result["status"], $result["message"]);
+
+        return redirect()->route('ver_carrinho');
+    }
+
+    public function comprasHistorico(Request $request)
+    {
+        $data = [];
+
+        $id_usuario = auth::user()->id;
+
+        $listapedido = Pedido::where("usuario_id", $id_usuario)
+            ->orderBy("dt_pedido", "desc")
+            ->get();
+
+        $data["lista"] = $listapedido;
+
+        return view("compra/historico", $data);
+    }
 }

@@ -32,7 +32,10 @@ Route::match(['get', 'post'], 'cliente/cadastrar', [ClienteController::class, 'c
     ->name('cadastrar_cliente');
 
 Route::match(['get', 'post'], '/login', [UsuarioController::class, 'logar'])
-    ->name('logar');    
+    ->name('logar');
+
+Route::match(['get', 'post'], '/logout', [UsuarioController::class, 'logout'])
+    ->name('logout');        
 
 Route::match(['get', 'post'], '/{idproduto}/carrinho/adicionar', [ProdutoController::class, 'adicionarCarrinho'])
     ->name('adicionar_carrinho');
@@ -43,6 +46,12 @@ Route::match(['get', 'post'], '/carrinho', [ProdutoController::class, 'verCarrin
 
 Route::match(['get', 'post'], '/{idproduto}/carrinho/remover', [ProdutoController::class, 'removerItemCarrinho'])
     ->name('remover_item_carrinho');
+
+Route::match(['get', 'post'], '/carrinho/finalizar', [ProdutoController::class, 'finalizarCarrinho'])
+    ->name('finalizar_carrinho');      
+
+Route::match(['get', 'post'], '/carrinho/historico', [ProdutoController::class, 'comprasHistorico'])
+    ->name('compra_historico');          
 
 
 

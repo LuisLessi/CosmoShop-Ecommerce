@@ -31,16 +31,27 @@
                     <li class="nav-item">
                         <a href="{{ route('categoria')}}" class="nav-link">Categorias</a>
                     </li>
+                    @if(!auth()->check())
                     <li class="nav-item">
                         <a href="{{ route('logar')}}" class="nav-link">Login</a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('cadastrar')}}" class="nav-link">Cadastrar</a>
                     </li>
+                    @else
+                    <li class="nav-item">
+                        <a href="{{ route('compra_historico')}}" class="nav-link">Histórico</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('logout')}}" class="nav-link">Sair</a>
+                    </li>
+                    @endif
+                    
                 </ul>
             </div>
 
-            <a href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fa fa-shopping-cart fa-2x"></i></a>
+            <a href="{{ route('ver_carrinho') }}" class="btn btn-sm ml-5"><i class="fa fa-shopping-cart fa-2x"></i></a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -50,6 +61,7 @@
 
     <div class="container">
         <div class="row">
+        
         @if(auth()->check())
             <!-- Se o usuário estiver logado, exiba a mensagem de boas-vindas com o primeiro nome -->
             <div class="col-12">
