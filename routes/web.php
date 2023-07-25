@@ -51,7 +51,7 @@ Route::match(['get', 'post'], '/carrinho/finalizar', [ProdutoController::class, 
     ->name('finalizar_carrinho');      
 
 Route::match(['get', 'post'], '/carrinho/historico', [ProdutoController::class, 'comprasHistorico'])
-    ->name('compra_historico');          
+    ->name('compra_historico');             
 
-
-
+Route::post('/compras/detalhes', [ProdutoController::class, 'detalhes'])
+    ->name('compra_detalhes');
