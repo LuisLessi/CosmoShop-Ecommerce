@@ -1,5 +1,7 @@
 @extends("layout")
-@section("script.js")
+@section("scriptjs")
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 $(function(){
     $(".infocompra").on('click', function() { // Use uma função regular ao invés de arrow function
@@ -14,6 +16,7 @@ $(function(){
 });
 </script>
 @endsection
+
 @section("conteudo")
 <title>CosmoShop - ecommerce</title>
 <div class="col-12">

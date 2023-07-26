@@ -55,3 +55,6 @@ Route::match(['get', 'post'], '/carrinho/historico', [ProdutoController::class, 
 
 Route::post('/compras/detalhes', [ProdutoController::class, 'detalhes'])
     ->name('compra_detalhes');
+
+Route::match(['get', 'post'], '/compras/pagar', [ProdutoController::class, 'pagar'])
+    ->name('pagar');   

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\ItensPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
 use App\Models\Usuario;
@@ -10,9 +11,26 @@ use App\Services\VendaService;
 use Illuminate\Http\Request;
 
 use Auth;
+use PagSeguro\Configuration\Configure;
 
 class ProdutoController extends Controller
 {
+
+    private $_configs;
+
+    public function __construct()
+    {
+        $this->_configs = new Configure();
+        $this->_configs->setCharset("UTF-8");
+        $this->_configs->setAccountCredentials(env('PAGSEGURO_EMAIL'), env('PAGSEGURO_TOKEN'));
+        $this->_configs->setEnvironment(env('PAGSEGURO_AMBIENTE'));
+        $this->_configs->setLog(true, storage_path('logs/pagseguro_' . date('Ymd' . '.log')));
+    }
+
+    public function getCredential(){
+        return $this->_configs->getAccountCredentials();
+    }
+
     public function index(Request $request)
     {
         $data = [
@@ -125,7 +143,27 @@ class ProdutoController extends Controller
     }
 
     public function detalhes(Request $request)
-{
-    echo "teste";
-}
+    {
+        $idpedido = $request->input('idpedido');
+
+        $listaItens = ItensPedido::join("produtos", "produtos.id", "=", "itens_pedidos.produto_id")
+            ->where("pedido_id", $idpedido)
+            ->get(['itens_pedidos.*', 'itens_pedidos.valor as valoritem', 'produtos.*']);
+
+        $data = [];
+        $data["listaItens"] = $listaItens;
+        return view("compra/detalhes", $data);
+    }
+
+    public function pagar (Request $request){
+        $data = [];
+
+        $sessionCode = \PagSeguro\Services\Session::create(
+            $this->getCredential()
+        );
+        $IDSession = $sessionCode->getResult();
+        $data['sessionID'] = $IDSession;
+
+        return view("compra/pagar", $data);
+    }
 }
