@@ -1,34 +1,132 @@
 @extends("layout")
 @section("scriptjs")
-<script type="text/javascript" src=
-"https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
 
 <script>
-function carregar() {
-    PagSeguroDirectPayment.setSessionId('{{ $sessionID }}')
-}
-$(function(){
-    carregar();
+    function carregar() {
+        PagSeguroDirectPayment.setSessionId('{{ $sessionID }}')
+    }
+    $(function() {
+        carregar();
 
-    $(".ncredito").on('blur', function(){
-        PagSeguroDirectPayment.onSenderHashReady(function(response){
-            if (response.status == 'error') {
-                console.log(response.message)
-                return false
+        $(".ncredito").on('blur', function() {
+            PagSeguroDirectPayment.onSenderHashReady(function(response) {
+                if (response.status == 'error') {
+                    console.log(response.message)
+                    return false
+                }
+
+                var hash = response.senderHash
+                $(".hasheller").val(hash)
+            })
+
+            let ncartao = $(this).val()
+             $(".bandeira").val("")
+            if (ncartao.length > 6) {
+                let prefixcartao = ncartao.substr(0, 6)
+                PagSeguroDirectPayment.getBrand({
+                    cardBin : prefixcartao,
+                    success : function(response) {
+                        $(".bandeira").val(response.brand.name)
+                    },
+                    error : function(response) {
+                        alert("Numero do cartão inválido")
+                    }
+                })
+            } 
+        })
+
+        $(".nparcela").on('blur', function() {
+            var bandeira = $(".bandeira").val();
+            var totalParcelas = $(this).val();
+            if (bandeira == "") {
+                alert("Preencha o numero de cartão válido");
+                return;
             }
 
-            var hash = response.senderHash
-            $(".hasheller").val(hash)
+            PagSeguroDirectPayment.getInstallments({
+                amount: $(".totalfinal").val(),
+                maxInstallmentNoInterest: 2,
+                brand: bandeira,
+                success: function(response) {
+                console.log(response);
+                let status = response.error
+                if (status) {
+                    alert("Não foi encontrado opção de parcelamento")
+                    return;
+                }
+
+                let installmentsData = response.installments[bandeira];
+                let selectedInstallment = installmentsData[totalParcelas - 1]; // Get the selected installment
+
+                let totalpagar = selectedInstallment.totalAmount;
+                let valorTotalParcela = selectedInstallment.installmentAmount;
+
+                console.log("totalpagar:", totalpagar);
+                console.log("valorTotalParcela:", valorTotalParcela);
+                $(".totalparcela").val(valorTotalParcela);
+                $(".totalpagar").val(totalpagar);
+                }
+            })
+        })
+        $(".Pagar").off('click').on("click", function(){
+            var numerocartao = $(".ncredito").val()
+            var iniciocartao = numerocartao.substr(0, 6)
+            var ncvv = $(".ncvv").val()
+            var anoexp = $(".anoexp").val()
+            var mesexp = $(".mesexp").val()
+            var hasheller = $(".hasheller").val()
+            var bandeira = $(".bandeira").val()
+
+            PagSeguroDirectPayment.createCardToken({
+                cardNumber : numerocartao,
+                brand : bandeira,
+                cvv : ncvv,
+                expirationMonth : mesexp,
+                expirationYear : anoexp,
+                success : function(response){
+                    alert("Token da transação recuperado com sucesso")
+                    console.log(response);
+                },
+                error : function(err){
+                    alert("Não foi possível buscar o token do cartão, verifique todos os campos")
+                    console.log(err);
+                }
+            })
         })
     })
-})
 </script>
 @endsection
 @section("conteudo")
 
 <form>
-    <input type="text" name="hasheller" class="hasheller">
+    @php $total =0; @endphp
+    @if(isset($cart) && count($cart) > 0)
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($cart as $p)
+            <tr>
+                <td style="vertical-align: middle;">{{ $p['nome'] }}</td>
+                <td style="vertical-align: middle;">{{ $p['valor'] }}</td>
+            </tr>
+
+            @php $total += $p->valor; @endphp
+            @endforeach
+        </tbody>
+
+    </table>
+    @endif
+    <input type="hidden" name="hasheller" class="hasheller">
+    <input type="hidden" name="bandeira" class="bandeira">
+
+
     <div class="row">
         <div class="col-4">
             Cartão de Crédito:
@@ -56,14 +154,18 @@ $(function(){
         </div>
         <div class="col-4">
             Valor total:
-            <input type="text" name="totalfinal" class="totalfinal form-control">
+            <input type="text" name="totalfinal" value="{{ $total }}" class="totalfinal form-control" readonly>
         </div>
         <div class="col-4">
             Valor da Parcela:
-            <input type="text" name="totalparcela" class="totalparcela form-control">
+            <input type="text" name="totalparcela" class="totalparcela form-control" >
+        </div>
+        <div class="col-4">
+            Total à Pagar:
+            <input type="text" name="totalpagar" class="totalpagar form-control">
         </div>
         @csrf
-        <input type="button" value="Pagar" class="btn btn-lg btn-success mt-5">
+        <input type="button" value="Pagar" class="Pagar btn btn-lg btn-success mt-5">
     </div>
 </form>
 @endsection
