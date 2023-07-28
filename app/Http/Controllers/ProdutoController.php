@@ -119,7 +119,74 @@ class ProdutoController extends Controller
         $result = $vendaService->finalizarVenda($carrinho, auth::user());
 
         if ($result["status"] == "ok") {
-            $request->session()->forget("cart");
+           // $request->session()->forget("cart");
+            
+            $credCard = new \PagSeguro\Domains\Requests\DirectPayment\CreditCard();
+            $credCard->setReference("PED_" . $result["idpedido"]);
+            $credCard->setCurrency("BRL");
+
+            foreach($carrinho as $p){
+                $credCard->addItems()->withParameters(
+                    $p->id,
+                    $p->nome,
+                    1,
+                    number_format($p->valor, 2, ".", "")
+                );
+            }
+
+            $user = auth::user();
+
+            $credCard->setSender()->setName($user->nome . " " . $user->nome);
+            //$credCard->setSender()->setEmail($user->email);
+            $credCard->setSender()->setEmail($user->login . "@sandbox.pagseguro.com.br");
+            $credCard->setSender()->setHash($request->input("hasheller"));
+            $credCard->setSender()->setPhone()->withParameters(21, 21311255);
+            $credCard->setSender()->setDocument()->withParameters("CPF", $user->login);
+
+            $credCard->setShipping()->setAddress()->withParameters(
+                'Av. A',
+                '1234',
+                'Jardim Botanico',
+                '22775554',
+                'Rio de Janeiro',
+                'RJ',
+                'BRA',
+                'Apt. 100'
+            );
+
+            $credCard->setBilling()->setAddress()->withParameters(
+                'Av. A',
+                '1234',
+                'Jardim Botanico',
+                '22775554',
+                'Rio de Janeiro',
+                'RJ',
+                'BRA',
+                'Apt. 100'
+            );
+
+            $credCard->setToken($request->input("cardToken"));
+
+            $nparcela = $request->input("nparcela");
+            $totalpagar = $request->input("totalpagar");
+            $totalParcelas = $request->input("totalParcela");
+
+            $credCard->setInstallment()->withParameters($nparcela, number_format($totalParcelas, 2,".",""));
+
+            //Dados do titular do cartao
+            $credCard->setHolder()->setName($user->nome . " " . $user->nome);
+            $credCard->setHolder()->setDocument()->withParameters("CPF", $user->login);
+            $credCard->setHolder()->setBirthdate("01/01/1980");
+            $credCard->setHolder()->setPhone()->withParameters(21, 12341234);
+
+            $credCard->setMode("DEFAULT");
+            $result = $credCard->register($this->_configs->getAccountCredentials());
+
+            return response()->json(['status' => 'success', 'message' => 'Compra realizada com sucesso']);
+            echo "Compra realizada com sucesso";
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Compra não realizada']);
+            echo "Compra não realizada";
         }
 
         $request->session()->flash($result["status"], $result["message"]);

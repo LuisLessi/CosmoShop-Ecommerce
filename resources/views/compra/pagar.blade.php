@@ -4,11 +4,20 @@
 <script type="text/javascript" src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
 
 <script>
+    $(function() {
+            // Add this part to include CSRF token in AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
     function carregar() {
         PagSeguroDirectPayment.setSessionId('{{ $sessionID }}')
     }
     $(function() {
         carregar();
+        
 
         $(".ncredito").on('blur', function() {
             PagSeguroDirectPayment.onSenderHashReady(function(response) {
@@ -50,6 +59,7 @@
                 maxInstallmentNoInterest: 2,
                 brand: bandeira,
                 success: function(response) {
+                console.log("Response from getInstallments:", response);
                 console.log(response);
                 let status = response.error
                 if (status) {
@@ -65,12 +75,14 @@
 
                 console.log("totalpagar:", totalpagar);
                 console.log("valorTotalParcela:", valorTotalParcela);
+                
                 $(".totalparcela").val(valorTotalParcela);
                 $(".totalpagar").val(totalpagar);
                 }
             })
         })
         $(".Pagar").off('click').on("click", function(){
+            console.log("Pagar button clicked.");
             var numerocartao = $(".ncredito").val()
             var iniciocartao = numerocartao.substr(0, 6)
             var ncvv = $(".ncvv").val()
@@ -86,8 +98,17 @@
                 expirationMonth : mesexp,
                 expirationYear : anoexp,
                 success : function(response){
-                    alert("Token da transação recuperado com sucesso")
-                    console.log(response);
+                    console.log("Card token obtained:", response.card.token);
+                    var cardToken = response.card.token;
+                    $.post('{{ route("finalizar_carrinho")}}', {
+                        hasheller : hasheller,
+                        cardToken : cardToken,
+                        nparcela : $(".nparcela").val(),
+                        totalpagar : $(".totalpagar").val(),
+                        totalParcelas : $(".totalparcela").val()
+                    }, function(result) {
+                        alert(result)
+                    });
                 },
                 error : function(err){
                     alert("Não foi possível buscar o token do cartão, verifique todos os campos")
@@ -96,6 +117,7 @@
             })
         })
     })
+});
 </script>
 @endsection
 @section("conteudo")
@@ -123,8 +145,8 @@
 
     </table>
     @endif
-    <input type="hidden" name="hasheller" class="hasheller">
-    <input type="hidden" name="bandeira" class="bandeira">
+    <input type="text" name="hasheller" class="hasheller">
+    <input type="text" name="bandeira" class="bandeira">
 
 
     <div class="row">

@@ -37,7 +37,7 @@ class VendaService
             }
 
             \DB::commit();
-            return ['status' => 'ok', 'message' => 'Compra efetuada com sucesso'];
+            return ['status' => 'ok', 'message' => 'Compra efetuada com sucesso', 'idpedido' => $pedido->id];
         } catch (Exception $e) {
             \DB::rollback();
             Log::error("ERRO:VENDA SERVICE", ['message' => $e->getMessage()]);
