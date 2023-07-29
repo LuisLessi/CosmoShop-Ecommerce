@@ -27,7 +27,8 @@ class ProdutoController extends Controller
         $this->_configs->setLog(true, storage_path('logs/pagseguro_' . date('Ymd' . '.log')));
     }
 
-    public function getCredential(){
+    public function getCredential()
+    {
         return $this->_configs->getAccountCredentials();
     }
 
@@ -119,13 +120,13 @@ class ProdutoController extends Controller
         $result = $vendaService->finalizarVenda($carrinho, auth::user());
 
         if ($result["status"] == "ok") {
-           // $request->session()->forget("cart");
-            
+            // $request->session()->forget("cart");
+
             $credCard = new \PagSeguro\Domains\Requests\DirectPayment\CreditCard();
             $credCard->setReference("PED_" . $result["idpedido"]);
             $credCard->setCurrency("BRL");
 
-            foreach($carrinho as $p){
+            foreach ($carrinho as $p) {
                 $credCard->addItems()->withParameters(
                     $p->id,
                     $p->nome,
@@ -171,7 +172,7 @@ class ProdutoController extends Controller
             $totalpagar = $request->input("totalpagar");
             $totalParcelas = $request->input("totalParcela");
 
-            $credCard->setInstallment()->withParameters($nparcela, number_format($totalParcelas, 2,".",""));
+            $credCard->setInstallment()->withParameters($nparcela, number_format($totalpagar / $nparcela, 2, ".", ""));
 
             //Dados do titular do cartao
             $credCard->setHolder()->setName($user->nome . " " . $user->nome);
@@ -222,11 +223,12 @@ class ProdutoController extends Controller
         return view("compra/detalhes", $data);
     }
 
-    public function pagar (Request $request){
+    public function pagar(Request $request)
+    {
         $data = [];
 
         $carrinho = session('cart', []);
-        $data[ 'cart' ] = $carrinho;
+        $data['cart'] = $carrinho;
 
         $sessionCode = \PagSeguro\Services\Session::create(
             $this->getCredential()
